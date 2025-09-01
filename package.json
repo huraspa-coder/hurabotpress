@@ -20,6 +20,7 @@
     "fix:eslint": "eslint --fix ./",
     "fix:lint": "pnpm fix:oxlint && pnpm fix:eslint",
     "check": "pnpm check:sherif && pnpm check:dep && pnpm check:format && pnpm check:lint && pnpm check:type",
+    "start": "botpress start",
     "fix": "pnpm fix:sherif && pnpm fix:dep && pnpm fix:oxlint && pnpm fix:format && pnpm fix:lint"
   },
   "lint-staged": {
