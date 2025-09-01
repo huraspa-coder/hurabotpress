@@ -2,25 +2,26 @@
 # Stage 1: builder
 FROM node:18 AS builder
 
-# Activar corepack y pin de pnpm (según packageManager)
+# Activar corepack y pnpm (versión definida en packageManager)
 RUN corepack enable
 RUN corepack prepare pnpm@8.6.2 --activate
 
 WORKDIR /app
 
-# Copiamos archivos críticos para cache de dependencias
+# Copiamos archivos críticos para cachear instalación
+# Si no existe alguno, el COPY fallará; en ese caso remueve los nombres que no tengas.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 
-# Instalar dependencias (incluye dev deps para poder build)
+# Instalar dependencias (incluye dev deps para build)
 RUN pnpm install --frozen-lockfile
 
-# Copiar el resto del código
+# Copiar el resto del repo
 COPY . .
 
-# Ejecutar la build (usar script "build" en root)
+# Ejecutar la build usando tu "build" en package.json (turbo run ...)
 RUN pnpm build
 
-# Stage 2: runtime
+# Stage 2: runtime (ligero)
 FROM node:18 AS runtime
 
 ENV NODE_ENV=production
@@ -30,14 +31,14 @@ RUN corepack prepare pnpm@8.6.2 --activate
 
 WORKDIR /app
 
-# Copiamos la app construida
+# Copiamos la app ya construida
 COPY --from=builder /app /app
 
-# Instalar solo dependencias de producción para reducir tamaño
+# Instalar sólo deps de producción
 RUN pnpm install --prod --frozen-lockfile
 
-# Exponer puerto por defecto de Botpress
+# Puerto por defecto de Botpress
 EXPOSE 3000
 
-# Command final
+# Arrancar con tu script start (botpress start)
 CMD ["pnpm", "start"]
