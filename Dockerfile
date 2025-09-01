@@ -1,45 +1,43 @@
-# Dockerfile (multi-stage) — build + runtime
-# Stage 1: builder (instala todo y construye)
+# Dockerfile (multi-stage) — builder + runtime
+# Stage 1: builder
 FROM node:18 AS builder
 
-# Activar corepack y pnpm (versión que define packageManager)
+# Activar corepack y pin de pnpm (según packageManager)
 RUN corepack enable
 RUN corepack prepare pnpm@8.6.2 --activate
 
 WORKDIR /app
 
-# Copiamos archivos de lock y package para cachear la instalación
-# Incluye pnpm-lock.yaml y pnpm-workspace.yaml si los tienes
+# Copiamos archivos críticos para cache de dependencias
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
-# Si no tienes alguno, COPY solo los que existan en tu repo.
+
 # Instalar dependencias (incluye dev deps para poder build)
 RUN pnpm install --frozen-lockfile
 
 # Copiar el resto del código
 COPY . .
 
-# Ejecutar la build (usa tu script "build" en root)
+# Ejecutar la build (usar script "build" en root)
 RUN pnpm build
 
-# Stage 2: runtime (ligero)
+# Stage 2: runtime
 FROM node:18 AS runtime
 
 ENV NODE_ENV=production
-# Activar pnpm en runtime también
+
 RUN corepack enable
 RUN corepack prepare pnpm@8.6.2 --activate
 
 WORKDIR /app
 
-# Copiamos la app ya construida desde builder
+# Copiamos la app construida
 COPY --from=builder /app /app
 
-# Instalar solo dependencias de producción (reduce tamaño)
-# Esto también regenerará node_modules para producción
+# Instalar solo dependencias de producción para reducir tamaño
 RUN pnpm install --prod --frozen-lockfile
 
-# Exponer puerto (ajusta si usas otro)
+# Exponer puerto por defecto de Botpress
 EXPOSE 3000
 
-# Comando final — usa tu start script
+# Command final
 CMD ["pnpm", "start"]
