@@ -31,10 +31,12 @@
     "**/*.{json,yaml,yml,md}": "prettier --write",
     "**/*.test.ts": "vitest --run"
   },
+  "dependencies": {
+    "@botpress/cli": "workspace:*"
+  },
   "devDependencies": {
     "@aws-sdk/client-dynamodb": "^3.564.0",
     "@botpress/api": "1.37.0",
-    "@botpress/cli": "workspace:*",
     "@botpress/client": "workspace:*",
     "@botpress/sdk": "workspace:*",
     "@bpinternal/depsynky": "0.2.0",
