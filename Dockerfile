@@ -19,6 +19,9 @@ RUN npm install -g pnpm@10.15.1
 ENV PNPM_HOME=/root/.local/share/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 
+# Instala node-gyp-build globalmente
+RUN pnpm add -g node-gyp-build
+
 # Instala la última versión de Botpress CLI globalmente
 RUN pnpm install -g @botpress/cli@latest
 
