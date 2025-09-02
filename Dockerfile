@@ -11,10 +11,7 @@ RUN npm install -g pnpm@10.15.1
 ENV PNPM_HOME=/root/.local/share/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 
-# Inicializa directorio de binarios globales
-RUN pnpm setup
-
-# Instala Botpress CLI global (última versión)
+# Instala Botpress CLI global directamente
 RUN pnpm install -g @botpress/cli@latest
 
 # Copiar archivos de dependencias y parches antes de instalar
