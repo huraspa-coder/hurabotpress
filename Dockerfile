@@ -1,4 +1,4 @@
-# Dockerfile - Botpress OSS + CLI (adaptado a tu setup local)
+# Dockerfile - Botpress OSS + CLI (última versión)
 FROM node:18
 
 # Directorio de la app
@@ -11,13 +11,16 @@ RUN npm install -g pnpm@10.15.1
 ENV PNPM_HOME=/root/.local/share/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 
+# Instala la última versión de Botpress CLI globalmente
+RUN pnpm install -g @botpress/cli@latest
+
 # Copiar archivos de lock y workspace
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 
 # Copiar patches si existen
 COPY patches ./patches
 
-# Copiar todo el repo
+# Copiar todo el repo (integraciones, src, etc.)
 COPY . .
 
 # Instalar todas las dependencias del workspace
