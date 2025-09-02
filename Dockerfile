@@ -11,9 +11,6 @@ RUN npm install -g pnpm@10.15.1
 ENV PNPM_HOME=/root/.local/share/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 
-# Inicializa directorio de binarios globales
-RUN pnpm setup
-
 # Instala Botpress CLI global
 RUN pnpm install -g @botpress/cli@latest
 
@@ -21,7 +18,7 @@ RUN pnpm install -g @botpress/cli@latest
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 
 # Instalar dependencias de workspace
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --shamefully-hoist --no-frozen-lockfile
 
 # Copiar el resto del repo (integraciones, src, etc)
 COPY . .
