@@ -14,15 +14,14 @@ ENV PATH=$PNPM_HOME:$PATH
 # Instala Botpress CLI global
 RUN pnpm install -g @botpress/cli@latest
 
-# Copiar archivos de package, lock y patches antes de instalar deps
+# Copiar archivos esenciales y parches antes de instalar deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./ 
 COPY patches ./patches
+COPY packages ./packages
+COPY integrations ./integrations
 
 # Instalar dependencias de workspace
 RUN pnpm install --shamefully-hoist --no-frozen-lockfile
-
-# Copiar el resto del repo (integraciones, src, etc)
-COPY . .
 
 # Construir todas las integraciones y paquetes
 RUN pnpm build
