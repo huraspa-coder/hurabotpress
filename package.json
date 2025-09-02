@@ -39,7 +39,7 @@
     "@aws-sdk/client-dynamodb": "^3.564.0",
     "@botpress/api": "1.37.0",
     "@botpress/client": "^0.31.0:*",
-    "@botpress/sdk": "workspace:*",
+    "@botpress/sdk": "^0.6.0:*",
     "@bpinternal/depsynky": "0.2.0",
     "@bpinternal/readiness": "^0.0.16",
     "@bpinternal/retry-cli": "^0.1.1",
