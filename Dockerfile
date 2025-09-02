@@ -1,14 +1,15 @@
 # Dockerfile - Botpress OSS + CLI (última versión)
 FROM node:18
 
-# Directorio de la app
+# Configura directorio de la app
 WORKDIR /app
 
-# Instala herramientas de compilación para Node nativo
+# Instala herramientas de compilación para paquetes nativos
 RUN apt-get update && apt-get install -y \
     python3 \
     make \
     g++ \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Instala pnpm
