@@ -1,43 +1,49 @@
-# ====== Dockerfile Botpress OSS completo ======
-FROM node:18-bullseye
+# ====== Dockerfile definitivo para Botpress ======
 
-WORKDIR /app
+# Base image
+FROM node:20-bullseye-slim
 
-# Instalar herramientas de compilación para dependencias nativas
+# ====== Variables de entorno ======
+ENV BOTPRESS_VERSION=13.18.1
+ENV PNPM_HOME="/root/.local/share/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+# ====== Instalar herramientas necesarias ======
 RUN apt-get update && apt-get install -y \
-    build-essential \
     python3 \
-    python3-dev \
-    git \
-    curl \
     make \
     g++ \
+    curl \
+    git \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalar PNPM y dependencias globales necesarias
-RUN npm install -g pnpm@10.15.1 node-gyp prebuild-install @botpress/cli@latest
+# ====== Instalar PNPM (última versión) ======
+RUN npm install -g pnpm@latest
 
-# Configurar PATH de PNPM
-ENV PNPM_HOME=/root/.local/share/pnpm
-ENV PATH=$PNPM_HOME:$PATH
+# ====== Crear directorio de la app ======
+WORKDIR /app
 
-# Copiar archivos de lockfiles primero para cache
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+# ====== Copiar package.json y pnpm-lock.yaml primero ======
+# Esto permite instalar dependencias sin copiar todo el código (cache layer)
+COPY package.json pnpm-lock.yaml ./
 
-# Copiar todo el proyecto (integraciones, src, patches)
+# ====== Configurar PNPM y evitar errores con patches/scripts ======
+RUN pnpm config set ignore-patches true \
+ && pnpm config set fetch-retries 5 \
+ && pnpm install --shamefully-hoist --no-frozen-lockfile --ignore-scripts
+
+# ====== Copiar el resto del proyecto ======
 COPY . .
 
-# Ignorar patches locales para evitar errores
-RUN pnpm config set ignore-patches true
+# ====== Construir Botpress ======
+RUN pnpm run build
 
-# Instalar todas las dependencias del workspace
-RUN pnpm install --shamefully-hoist --no-frozen-lockfile
+# ====== Instalar Botpress CLI global (última versión) ======
+RUN pnpm add -g @botpress/cli@latest
 
-# Construir todos los paquetes
-RUN pnpm build
-
-# Exponer puerto estándar de Botpress
+# ====== Exponer puerto Botpress ======
 EXPOSE 3000
 
-# Arrancar Botpress
-CMD ["pnpm", "start"]
+# ====== Comando para iniciar Botpress ======
+CMD ["botpress", "start", "--production"]
