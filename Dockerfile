@@ -4,6 +4,13 @@ FROM node:18
 # Directorio de la app
 WORKDIR /app
 
+# Instala herramientas de compilación para Node nativo
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
 # Instala pnpm
 RUN npm install -g pnpm@10.15.1
 
