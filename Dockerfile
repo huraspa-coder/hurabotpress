@@ -1,9 +1,9 @@
-# ====== Dockerfile Botpress OSS + CLI ======
+# ====== Dockerfile Botpress OSS completo ======
 FROM node:18-bullseye
 
 WORKDIR /app
 
-# Instala herramientas de compilación necesarias para dependencias nativas
+# Instalar herramientas de compilación para dependencias nativas
 RUN apt-get update && apt-get install -y \
     build-essential \
     python3 \
@@ -14,26 +14,26 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Instala PNPM y CLI globales
-RUN npm install -g pnpm@10.15.1 prebuild-install @botpress/cli@latest
+# Instalar PNPM y dependencias globales necesarias
+RUN npm install -g pnpm@10.15.1 node-gyp prebuild-install @botpress/cli@latest
 
-# Configura PNPM global
+# Configurar PATH de PNPM
 ENV PNPM_HOME=/root/.local/share/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 
-# Copiar lockfiles primero para aprovechar cache
+# Copiar archivos de lockfiles primero para cache
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 
-# Copiar todo el repo (integraciones, src, patches)
+# Copiar todo el proyecto (integraciones, src, patches)
 COPY . .
 
-# Ignorar patches locales problemáticos si existen
+# Ignorar patches locales para evitar errores
 RUN pnpm config set ignore-patches true
 
 # Instalar todas las dependencias del workspace
 RUN pnpm install --shamefully-hoist --no-frozen-lockfile
 
-# Construir todos los paquetes e integraciones
+# Construir todos los paquetes
 RUN pnpm build
 
 # Exponer puerto estándar de Botpress
