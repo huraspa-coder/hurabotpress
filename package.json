@@ -32,7 +32,8 @@
     "**/*.test.ts": "vitest --run"
   },
   "dependencies": {
-    "@botpress/cli": "^1.37.0"
+    "@botpress/cli": "^4.17.6",
+    "zod": "3.23.8"
   },
   "devDependencies": {
     "@aws-sdk/client-dynamodb": "^3.564.0",
