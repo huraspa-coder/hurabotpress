@@ -7,6 +7,13 @@ WORKDIR /app
 # Instala pnpm
 RUN npm install -g pnpm@10.15.1
 
+# Configura PNPM_HOME para global bin
+ENV PNPM_HOME=/root/.local/share/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+
+# Inicializa directorio de binarios globales
+RUN pnpm setup
+
 # Instala Botpress CLI global
 RUN pnpm install -g @botpress/cli@latest
 
