@@ -1,29 +1,38 @@
-# Dockerfile - Botpress OSS + CLI (última versión)
-FROM node:18-bullseye
+# Etapa de build
+FROM node:20-slim AS build
 
-# Configura directorio de la app
+# Instalar dependencias básicas
+RUN apt-get update && apt-get install -y \
+  python3 make g++ git curl \
+  && rm -rf /var/lib/apt/lists/*
+
+# Instalar pnpm globalmente
+RUN npm install -g pnpm
+
 WORKDIR /app
 
-# Instala pnpm
-RUN npm install -g pnpm@10.15.1
-
-# Copiar archivos principales primero (para aprovechar caché de Docker)
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+# Copiar solo los archivos necesarios para instalar dependencias
+COPY package.json pnpm-lock.yaml ./
+COPY patches ./patches
 
 # Instalar dependencias de workspace
 RUN pnpm install --shamefully-hoist --no-frozen-lockfile
 
-# Copiar el resto del proyecto (integraciones, src, etc)
+# Copiar el resto del proyecto
 COPY . .
 
-# Construir todos los paquetes e integraciones
+# Build de Botpress
 RUN pnpm run build
 
-# Instalar la última versión del CLI de Botpress de manera global
-RUN pnpm add -g @botpress/cli@latest
+# Etapa final
+FROM node:20-slim AS runtime
+WORKDIR /app
 
-# Exponer puerto de Botpress
+RUN npm install -g pnpm
+
+# Copiar desde la etapa de build
+COPY --from=build /app ./
+
 EXPOSE 3000
 
-# Arrancar Botpress (desde el CLI global)
-CMD ["botpress", "start"]
+CMD ["pnpm", "start"]
