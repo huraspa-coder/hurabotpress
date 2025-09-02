@@ -1,19 +1,18 @@
-# Dockerfile (builder simple que asegura que patches existan antes de instalar)
+# Dockerfile (temporal) — copia todo y usa --no-frozen-lockfile para evitar bloqueo por lock mismatch
 FROM node:18 AS builder
 
-# activar corepack/pnpm
 RUN corepack enable
 RUN corepack prepare pnpm@8.6.2 --activate
 
 WORKDIR /app
 
-# Copiamos TODO el repo primero (asegura que patches/ existan)
+# Copiamos todo para que patches/ existan
 COPY . .
 
-# Instalar dependencias (usa el lockfile si está presente)
-RUN pnpm install --frozen-lockfile
+# Instalar dependencias sin forzar el lockfile (temporal)
+RUN pnpm install --no-frozen-lockfile
 
-# Ejecutar la build del monorepo
+# Ejecutar build
 RUN pnpm build
 
 # Stage runtime
@@ -25,11 +24,10 @@ RUN corepack prepare pnpm@8.6.2 --activate
 
 WORKDIR /app
 
-# Copiamos artefactos desde el builder
 COPY --from=builder /app /app
 
-# Instalar solo deps de producción para aligerar la imagen
-RUN pnpm install --prod --frozen-lockfile || pnpm install --prod
+# Instalar solo deps prod (intenta con frozen, si falla, sin frozen)
+RUN pnpm install --prod --frozen-lockfile || pnpm install --prod --no-frozen-lockfile
 
 EXPOSE 3000
 
