@@ -1,4 +1,4 @@
-# ====== Imagen base ======
+# ====== Imagen base  ======
 FROM node:20-bullseye
 
 # ====== Variables de entorno ======
